@@ -1,13 +1,12 @@
 import React from "react";
 import "./App.css";
-import Container from "./component/Container";
-
+import Router from './router/router';
 
 export class App extends React.Component {
   render() {
     return (
       <>
-        <Container/>
+        <Router/>
       </>
     );
   }
