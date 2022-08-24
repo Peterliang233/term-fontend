@@ -5,7 +5,7 @@ const RouterConfig = [
     {
         path : "/",
         component: Container,
-        auth: false,
+        auth: true,
     },
     {
         path: "/login",

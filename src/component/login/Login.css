@@ -1,0 +1,23 @@
+.center{
+    margin: 0 50% 50% 35%;
+    height: 30%;
+    width: 25%;
+}
+
+.login {
+    margin-left: 35%;
+    margin-right: 20%;
+}
+
+.headDiv{
+    text-align: center;
+    height: 10%;
+    display: flex;
+    margin-left: 40%;
+}
+
+.total{
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(180deg, #a0d7e7, #6c5dd3);
+}
