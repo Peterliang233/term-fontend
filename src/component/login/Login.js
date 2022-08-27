@@ -1,6 +1,8 @@
 import { Button, Checkbox, Form, Input } from 'antd';
 import React from 'react';
+import {LoginReq} from "../api/Login";
 import "./Login.css";
+import {RegistryReq} from "../api/Registry";
 
 class App extends React.Component {
     constructor(props) {
@@ -21,8 +23,35 @@ class App extends React.Component {
         console.log('Failed:', errorInfo);
     };
 
-    onSubmit = () => {
-        console.log(this.state)
+
+    loginSubmit = () => {
+        // 登录请求后台
+        let data = {
+            username: '12345',
+            password: '123123',
+        }
+        LoginReq(data).then((res)=>{
+            console.log(res)
+            if (res.status===200){
+                localStorage.setItem("Authorization", res.data.token);
+                this.props.history.push("/");
+            }
+        })
+    }
+
+    registrySubmit = () => {
+        // 登录请求后台
+        let data = {
+            username: '12345',
+            password: '123123',
+        }
+        RegistryReq(data).then((res)=>{
+            console.log(res)
+            if (res.status===200){
+                localStorage.setItem("Authorization", res.data.token);
+                this.props.history.push("/");
+            }
+        })
     }
     render(){
         return (
@@ -117,7 +146,7 @@ class App extends React.Component {
                                     offset: 8,
                                     span: 16,
                                 }}
-                            ><Button type="primary" htmlType="submit">
+                            ><Button type="primary" htmlType="submit" onClick={this.loginSubmit}>
                                 登录
                             </Button>
                             </Form.Item>
@@ -127,7 +156,7 @@ class App extends React.Component {
                                     offset: 8,
                                     span: 16,
                                 }}
-                            ><Button type="primary" htmlType="submit" onClick={this.onSubmit}>
+                            ><Button type="primary" htmlType="submit" onClick={this.registrySubmit}>
                                 注册
                             </Button>
                             </Form.Item>

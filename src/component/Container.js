@@ -74,8 +74,8 @@ export default class Container extends React.Component {
             case '0': return <Home/>
             case '1': return <Resident/>
             case '2': return <Complaint/>
-            case '3': return <Fee/>
-            case '4': return <Repair/>
+            case '3': return <Repair/>
+            case '4': return <Fee/>
             case '5': return <Parking/>
             default:
                 return <Home/>
