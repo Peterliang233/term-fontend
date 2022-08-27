@@ -10,11 +10,10 @@ export default class FrontendAuth extends React.Component {
             return item.path === pathname;
         });
 
-        const isLogin = JSON.parse(sessionStorage.getItem("loginstatus"));
+        const isLogin = localStorage.getItem("authorization");
 
         if (!isLogin) {
             if (targetRouter.auth) {
-                console.log("please login");
                 return (
                     <Redirect exact to="/login"></Redirect>
                 )
@@ -23,6 +22,10 @@ export default class FrontendAuth extends React.Component {
                     <Route exact path={pathname} component={targetRouter.component}></Route>
                 )
             }
+        }else{
+            return (
+                <Route exact path={pathname} component={targetRouter.component}></Route>
+            )
         }
     }
 };

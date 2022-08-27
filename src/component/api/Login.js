@@ -3,7 +3,7 @@ import Service from '../axios/request';
 
 export const LoginReq = query => {
     return Service({
-        url: '/login',
+        url: 'user/login',
         method: 'post',
         params: query,
     });

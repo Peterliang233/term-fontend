@@ -33,7 +33,7 @@ class App extends React.Component {
         LoginReq(data).then((res)=>{
             console.log(res)
             if (res.status===200){
-                localStorage.setItem("Authorization", res.data.token);
+                localStorage.setItem("authorization", res.data.token);
                 this.props.history.push("/");
             }
         })

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 
-const BASE_URL = "http://localhost:8080"
+const BASE_URL = "http://localhost:3000"
 
 const instance = axios.create({
     timeout: 1000*20,
@@ -13,7 +13,7 @@ instance.defaults.headers.post['Content-Type'] = 'application/json';
 
 // 添加请求拦截器
 instance.interceptors.request.use(config=>{
-    const token=localStorage.getItem('token') // 获取token
+    const token=localStorage.getItem('authorization') // 获取token
     if (token) {
         // 如果有token，将token放入到请求头里面
         config.headers.Authorization = `Bearer ` + token;
