@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios from 'axios'
 
 
-const BASE_URL = "http://localhost:3000"
+const BASE_URL = "http://localhost:8888"
 
 const instance = axios.create({
     timeout: 1000*20,
@@ -10,14 +10,19 @@ const instance = axios.create({
 
 instance.defaults.headers.post['Content-Type'] = 'application/json';
 
-
 // 添加请求拦截器
 instance.interceptors.request.use(config=>{
-    const token=localStorage.getItem('authorization') // 获取token
+    if (config.url === '/login') {
+        console.log("登录请求");
+        return config;
+    }
+
+    const token=localStorage.getItem('Authorization') // 获取token
     if (token) {
         // 如果有token，将token放入到请求头里面
         config.headers.Authorization = `Bearer ` + token;
     }
+
     return config;
 }, error => {
     return Promise.reject(error)
@@ -26,11 +31,7 @@ instance.interceptors.request.use(config=>{
 
 // 添加响应拦截器
 instance.interceptors.response.use(response=>{
-    if (response.statusText === "ok") {
-        return Promise.resolve(response.data);
-    }else{
-        return Promise.reject(response.data.msg);
-    }
+    return Promise.resolve(response.data);
 }, error => {
     if (error.response) {
         if (error.response.status === 401) {

@@ -5,12 +5,13 @@ import {Redirect, Route} from "react-router-dom";
 
 export default class FrontendAuth extends React.Component {
     render(){
+        console.log(this);
         const pathname = this.props.location.pathname;
         const targetRouter = RouterConfig.find(function(item) {
             return item.path === pathname;
         });
 
-        const isLogin = localStorage.getItem("authorization");
+        const isLogin = localStorage.getItem("Authorization");
 
         if (!isLogin) {
             if (targetRouter.auth) {

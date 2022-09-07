@@ -1,58 +1,39 @@
-import { Button, Checkbox, Form, Input } from 'antd';
+import { Button, Checkbox, Form, Input, message } from 'antd';
 import React from 'react';
-import {LoginReq} from "../api/Login";
+import {LoginReq} from "../api/user/User";
 import "./Login.css";
-import {RegistryReq} from "../api/Registry";
+import {ErrorMessage, SuccessMessage, WarnMessage} from "../common/common";
 
 class App extends React.Component {
     constructor(props) {
         super(props);
 
         this.state={
-            title: '小区物业管理系统登录',
-            username: '',
-            password: '',
+            title: '小区物业管理系统登录'
         }
     }
 
-    onFinish = (values) => {
-        console.log('Success:', values);
-    };
 
-    onFinishFailed = (errorInfo) => {
-        console.log('Failed:', errorInfo);
-    };
-
-
-    loginSubmit = () => {
+    loginSubmit = (values) => {
         // 登录请求后台
-        let data = {
-            username: '12345',
-            password: '123123',
+        var data = {
+            username: values.username,
+            password: values.password,
         }
         LoginReq(data).then((res)=>{
-            console.log(res)
-            if (res.status===200){
-                localStorage.setItem("authorization", res.data.token);
+            if (res.status===0){
+                localStorage.setItem("Authorization", res.data.token);
                 this.props.history.push("/");
+                SuccessMessage(res.message);
+            }else{
+                WarnMessage(res.message);
             }
+        }).catch(error => {
+            ErrorMessage(error);
         })
     }
 
-    registrySubmit = () => {
-        // 登录请求后台
-        let data = {
-            username: '12345',
-            password: '123123',
-        }
-        RegistryReq(data).then((res)=>{
-            console.log(res)
-            if (res.status===200){
-                localStorage.setItem("Authorization", res.data.token);
-                this.props.history.push("/");
-            }
-        })
-    }
+
     render(){
         return (
             <div className="total">
@@ -100,9 +81,8 @@ class App extends React.Component {
                         initialValues={{
                             remember: true,
                         }}
-                        onFinish={this.onFinish}
-                        onFinishFailed={this.onFinishFailed}
                         autoComplete="off"
+                        onFinish={this.loginSubmit}
                     >
                         <Form.Item
                             label="用户名"
@@ -127,16 +107,6 @@ class App extends React.Component {
                         ><Input.Password />
                         </Form.Item>
 
-                        <Form.Item
-                            name="remember"
-                            valuePropName="checked"
-                            wrapperCol={{
-                                offset: 8,
-                                span: 16,
-                            }}
-                        ><Checkbox>记住我</Checkbox>
-                        </Form.Item>
-
                         <div style={{
                             display: "flex",
                         }}>
@@ -146,18 +116,8 @@ class App extends React.Component {
                                     offset: 8,
                                     span: 16,
                                 }}
-                            ><Button type="primary" htmlType="submit" onClick={this.loginSubmit}>
+                            ><Button type="primary" htmlType="submit">
                                 登录
-                            </Button>
-                            </Form.Item>
-                            <Form.Item
-                                className="register"
-                                wrapperCol={{
-                                    offset: 8,
-                                    span: 16,
-                                }}
-                            ><Button type="primary" htmlType="submit" onClick={this.registrySubmit}>
-                                注册
                             </Button>
                             </Form.Item>
                         </div>

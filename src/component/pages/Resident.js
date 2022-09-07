@@ -1,50 +1,62 @@
 import React, {useEffect, useState} from "react";
-import {Button, Table, Modal, Form, Input, Popconfirm} from 'antd';
+import {Button, Table, Modal, Form, Input, Popconfirm,message} from 'antd';
 import "./Resident.css";
+import "../api/resident/Resident";
+import {AddResident, DelResident, GetResidentList, UpdateResident} from "../api/resident/Resident";
+import {ErrorMessage, TransResidentData} from "../common/common";
 
 function Resident() {
     const [visible, setVisible] = useState(false);
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
-    const [enter_time,setEnterTime] = useState('');
+    const [enterTime,setEnterTime] = useState('');
+    const [disabled, setDisabled] = useState(false);
+    const [key, setKey] = useState();
 
 
 
-    const data = [
+    const [data, setData] = useState([
         {
-            key: '7',
+            key: 7,
             name: 'John Brown',
             phone: 12331421234,
             address: 60,
-            enter_time: 70,
+            enterTime: '2012-07-01',
         },
         {
-            key: '2',
+            key: 2,
             name: 'John Brown',
             phone: 1234134123,
             address: 60,
-            enter_time: 70,
+            enterTime: '2012-07-01',
         },
         {
-            key: '3',
+            key: 3,
             name: 'John Brown',
             phone: 2353513134,
             address: 60,
-            enter_time: 70,
+            enterTime: '2012-07-01',
         },
         {
-            key: '4',
+            key: 4,
             name: 'John Brown',
             phone: 1234531,
             address: 60,
-            enter_time: 70,
+            enterTime: '2012-07-01',
         },
-    ];
+    ]);
 
+    // 刷新的时候调用这个接口获取数据
     useEffect(()=>{
-        queResident();
-    },[data]);
+        console.log('请求一次数据');
+        GetResidentList().then((res)=>{
+            setData(TransResidentData(res.data.data))
+        }).catch((error)=>{
+            console.log(error)
+            ErrorMessage(error);
+        })
+    },[]);
     const columns = [
         {
             title: '姓名',
@@ -68,9 +80,9 @@ function Resident() {
         },
         {
             title: '入住时间',
-            dataIndex: 'enter_time',
+            dataIndex: 'enterTime',
             sorter: {
-                compare: (a, b) => a.enter_time - b.enter_time,
+                compare: (a, b) => a.enterTime - b.enterTime,
                 multiple: 1,
             },
         },
@@ -79,14 +91,21 @@ function Resident() {
             dataIndex: 'operator',
             render: (_, record) => <div className="operator">
                 <div>
-                    <Button type="primary" onClick={() => setVisible(true)}>修改信息</Button>
+                    <Button type="primary" onClick={() => {
+                        setVisible(true)
+                        setEnterTime(record.enterTime)
+                        setName(record.name)
+                        setKey(record.key)
+                        setAddress(record.address)
+                        setPhone(record.phone)
+                        setDisabled(true)
+                    }}>修改信息</Button>
                 </div>
                 <div style={{width: "5%"}}/>
                 <div>
                     <Button type="primary" danger><Popconfirm
                         title="确定删除该业主的信息吗？"
                         onConfirm={()=>delResident(record.key)}
-                        //onCancel={cancel}
                         okText="确定"
                         cancelText="再想想"
                     >
@@ -100,54 +119,87 @@ function Resident() {
 
 
     const delResident = (item)=>{
-        // 执行删除操作
-        console.log(item)
-    }
-
-    const renewResident = (e) => {
-        // 执行更新操作
+        // 调用后端接口执行删除操作
         let reqData = {
-            'id': e,
-            'name': name,
-            'phone': phone,
-            'address': address,
-            'enter_time': enter_time,
+            'id': item
         }
-
-        console.log(reqData)
+        DelResident(reqData).then((res)=>{
+            if (res.status === 0) {
+                setData(TransResidentData(res.data.data))
+            }
+        }).catch((error)=>{
+            ErrorMessage(error)
+        })
     }
 
-    const addResident = ()=>{
-        // 执行添加操作
-        let reqData = {
-            'name': name,
-            'phone': phone,
-            'address': address,
-            'enter_time': enter_time,
+    const updateTable = ()=>{
+        if (key === -1) {
+            // 执行添加操作
+            let reqData = {
+                'name': name,
+                'phone': phone,
+                'address': address,
+                'enterTime': enterTime,
+            }
+            // 向后端请求数据，然后替换data
+            console.log(reqData)
+            AddResident(reqData).then((res)=>{
+                if (res.status === 0) {
+                    // 获取所有的数据
+                    setData(TransResidentData(res.data.data))
+                }
+            }).catch((error)=>{
+                ErrorMessage(error);
+            })
+            
+        }else{
+            // 执行更新操作
+            console.log("update");
+            let reqData = {
+                'id': key,
+                'name': name,
+                'phone': phone,
+                'address': address,
+                'enterTime': enterTime,
+            }
+
+            // 更新数据，然后向后端请求数据，最后更新data
+            UpdateResident(reqData).then((res)=>{
+                if (res.status === 0) {
+                    // 请求最新数据
+                    setData(TransResidentData(res.data.data))
+                }
+            }).catch((error)=>{
+                ErrorMessage(error)
+            })
         }
-        console.log(reqData)
-       // 请求后端接口
-
-        // 重新绑定data
-    }
-
-    const queResident = ()=>{
-        console.log("拉取数据");
     }
 
     return (
         <div>
-            <div><Button onClick={()=>setVisible(true)}>新增住户</Button></div>
-            <Table dataSource={data} columns={columns}></Table>
+            <div><Button onClick={()=>{
+                setVisible(true)
+                setDisabled(false)
+                setName('')
+                setAddress('')
+                setPhone('')
+                setKey(-1)
+                setEnterTime('')
+            }}>新增住户</Button></div>
+            <Table 
+            dataSource={[...data]} 
+            columns={columns}
+            ></Table>
             <Modal
-                title="新增业主信息"
+                title="业主信息"
                 centered
                 visible={visible}
                 onOk={()=>{
-                    addResident()
+                    updateTable()
                     setVisible(false)
                 }}
                 onCancel={()=>setVisible(false)}
+                destroyOnClose={true}
             >
                 <Form
                     name="basic"
@@ -160,7 +212,6 @@ function Resident() {
                     initialValues={{
                         remember: true,
                     }}
-                    autoComplete="off"
                 >
                     <Form.Item
                         label="姓名"
@@ -172,7 +223,7 @@ function Resident() {
                             },
                         ]}
                     >
-                        <Input onChange={(e)=>setName(e.target.value)}/>
+                        <Input disabled={disabled} value={name} placeholder={name} onChange={(e)=>setName(e.target.value)} />
                     </Form.Item>
 
                     <Form.Item
@@ -185,7 +236,7 @@ function Resident() {
                             },
                         ]}
                     >
-                        <Input onChange={(e)=>setPhone(e.target.value)}/>
+                        <Input onChange={(e)=>setPhone(e.target.value)} value={phone} placeholder={phone}/>
                     </Form.Item>
                     <Form.Item
                         label="居住单元"
@@ -197,12 +248,13 @@ function Resident() {
                             },
                         ]}
                     >
-                        <Input onChange={(e)=>setAddress(e.target.value)}/>
+                        <Input onChange={(e)=>setAddress(e.target.value)} value={address} placeholder={address}/>
                     </Form.Item>
 
                     <Form.Item
                         label="入住时间"
-                        name="enter_time"
+                        name="enterTime"
+                
                         rules={[
                             {
                                 required: true,
@@ -210,7 +262,7 @@ function Resident() {
                             },
                         ]}
                     >
-                        <Input onChange={(e)=>setEnterTime(e.target.value)}/>
+                        <Input  disabled={disabled} value={enterTime} placeholder={enterTime} onChange={(e)=>setEnterTime(e.target.value)} />
                     </Form.Item>
                 </Form>
             </Modal>
