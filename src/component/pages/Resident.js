@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Button, Table, Modal, Form, Input, Popconfirm,message} from 'antd';
+import {Button, Table, Modal, Form, Input, Popconfirm} from 'antd';
 import "./Resident.css";
 import "../api/resident/Resident";
 import {AddResident, DelResident, GetResidentList, UpdateResident} from "../api/resident/Resident";
@@ -16,42 +16,14 @@ function Resident() {
 
 
 
-    const [data, setData] = useState([
-        {
-            key: 7,
-            name: 'John Brown',
-            phone: 12331421234,
-            address: 60,
-            enterTime: '2012-07-01',
-        },
-        {
-            key: 2,
-            name: 'John Brown',
-            phone: 1234134123,
-            address: 60,
-            enterTime: '2012-07-01',
-        },
-        {
-            key: 3,
-            name: 'John Brown',
-            phone: 2353513134,
-            address: 60,
-            enterTime: '2012-07-01',
-        },
-        {
-            key: 4,
-            name: 'John Brown',
-            phone: 1234531,
-            address: 60,
-            enterTime: '2012-07-01',
-        },
-    ]);
+    const [data, setData] = useState([]);
 
     // 刷新的时候调用这个接口获取数据
     useEffect(()=>{
-        console.log('请求一次数据');
         GetResidentList().then((res)=>{
-            setData(TransResidentData(res.data.data))
+            if (res.status === 0) {
+                setData(TransResidentData(res.data.data))
+            }
         }).catch((error)=>{
             console.log(error)
             ErrorMessage(error);
@@ -142,7 +114,6 @@ function Resident() {
                 'enterTime': enterTime,
             }
             // 向后端请求数据，然后替换data
-            console.log(reqData)
             AddResident(reqData).then((res)=>{
                 if (res.status === 0) {
                     // 获取所有的数据

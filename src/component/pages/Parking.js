@@ -1,105 +1,160 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Button, Form, Input, Modal, Popconfirm, Table} from "antd";
+import {AddParking, DelParking, GetParking, UpdateParking} from "../api/parking/Parking";
+import {ErrorMessage, TransParkingData} from "../common/common";
 
-export default class Home extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state={
-            visible: false,
-            number: '',
-            status: '',
-            tenant: '',
-            data: [
-                {
-                    key: '7',
-                    number: "12331421234",
-                    status: 70,
+function Parking(){
+    const [number, setNumber] = useState('');
+    const [status,setStatus] = useState('');
+    const [visible,setVisible] = useState(false);
+    const [tenant, setTenant] = useState('');
+    const [uuid,setUuid] = useState('');
+    const [key,setKey] = useState(0);
+    const [data,setData] = useState([]);
+    const [disabled,setDisabled] = useState(false);
+    const columns = [
+        {
+            title: '停车位编号',
+            dataIndex: 'number',
+            sorter: {
+                compare: (a, b) => a.number - b.number,
+                multiple: 3,
+            },
+        },
+            {
+                title: '停车位租户uuid',
+                dataIndex: 'uuid',
+                sorter: {
+                    compare: (a, b) => a.uuid- b.uuid,
+                    multiple: 3,
                 },
-                {
-                    key: '2',
-                    number: "1234134123",
-                    status: 70,
-                },
-                {
-                    key: '3',
-                    number: "2353513134",
-                    status: 70,
-                },
-                {
-                    key: '4',
-                    number: "1234531",
-                    status: 70,
-                },
-            ],
-            columns: [
-                {
-                    title: '停车位编号',
-                    dataIndex: 'number',
-                    sorter: {
-                        compare: (a, b) => a.number - b.number,
-                        multiple: 3,
-                    },
-                },
-                {
-                    title: '租用状态',
-                    dataIndex: 'status',
-                    sorter: {
-                        compare: (a, b) => a.status - b.status,
-                        multiple: 2,
-                    },
-                },
-                {
-                    title: '租户名',
-                    dataIndex: 'tenant',
-                    sorter: {
-                        compare: (a, b) => a.tenant - b.tenant,
-                        multiple: 1,
-                    },
-                },
-                {
-                    title: '操作',
-                    dataIndex: 'operator',
-                    render: (_, record) => <div className="operator">
-                        <div>
-                            <Button type="primary" onClick={() => this.setState({visible: true})}>修改信息</Button>
-                        </div>
-                        <div style={{width: "5%"}}/>
-                        <div>
-                            <Button type="primary" danger><Popconfirm
-                                title="确定删除该停车位信息吗？"
-                                onConfirm={()=>delComplaint(record.key)}
-                                //onCancel={cancel}
-                                okText="确定"
-                                cancelText="再想想"
-                            >
-                                <label>删除</label>
-                            </Popconfirm>
-                            </Button>
-                        </div>
-                    </div>
+            },
+        {
+            title: '租用状态',
+            dataIndex: 'status',
+            sorter: {
+                compare: (a, b) => a.status - b.status,
+                multiple: 2,
+            },
+        },
+        {
+            title: '租户名',
+            dataIndex: 'tenant',
+            sorter: {
+                compare: (a, b) => a.tenant - b.tenant,
+                multiple: 1,
+            },
+        },
+        {
+            title: '操作',
+            dataIndex: 'operator',
+            render: (_, record) => <div className="operator">
+                <div>
+                    <Button type="primary" onClick={() => {
+                        setVisible(true)
+                        setNumber(record.number)
+                        setUuid(record.uuid)
+                        setStatus(record.status)
+                        setTenant(record.tenant)
+                        setDisabled(true)
+                        setKey(record.key)
+                    }}>修改信息</Button>
+                </div>
+                <div style={{width: "5%"}}/>
+                <div>
+                    <Button type="primary" danger><Popconfirm
+                        title="确定删除该停车位信息吗？"
+                        onConfirm={()=>delComplaint(record.key)}
+                        //onCancel={cancel}
+                        okText="确定"
+                        cancelText="再想想"
+                    >
+                        <label>删除</label>
+                    </Popconfirm>
+                    </Button>
+                </div>
+            </div>
+        }
+    ];
+
+    useEffect(()=>{
+        GetParking().then((res)=>{
+            if(res.status === 0) {
+                setData(TransParkingData(res.data.data))
+            }
+        }).catch((error)=>{
+            ErrorMessage(error)
+        })
+    })
+    const delComplaint = (item) => {
+        let reqData = {
+            'id': item,
+        }
+
+        DelParking(reqData).catch((res)=>{
+            if(res.status === 0) {
+                setData(TransParkingData(res.data.data))
+            }
+        }).catch((error)=>{
+            ErrorMessage(error)
+        })
+    }
+
+    const updateTable = ()=> {
+        if(key===-1){
+            let reqData= {
+                'number': number,
+                'status': status,
+                'uuid': uuid,
+                'tenant': tenant,
+            }
+
+            AddParking(reqData).then((res)=>{
+                setData(TransParkingData(res.data.data))
+            }).catch((error)=>{
+                ErrorMessage(error)
+            })
+        }else{
+            let reqData= {
+                'id': key,
+                'number': number,
+                'status': status,
+                'uuid': uuid,
+                'tenant': tenant,
+            }
+
+            UpdateParking(reqData).then((res)=>{
+                if(res.status===0){
+                    setData(TransParkingData(res.data.data))
                 }
-            ],
-        };
-
-        const delComplaint = (value)=>{
-            console.log(value);
+            }).catch((error)=>{
+                ErrorMessage(error)
+            })
         }
     }
 
-    render(){
         return (
             <div>
-                <div><Button onClick={()=>this.setState({visible:true})}>新增停车位信息</Button></div>
-                <Table dataSource={this.state.data} columns={this.state.columns}></Table>
+                <div><Button onClick={()=>{
+                    setVisible(true)
+                    setNumber('')
+                    setUuid('')
+                    setTenant('')
+                    setStatus('')
+                    setDisabled(false)
+                    setKey(-1)
+                }}>新增停车位信息</Button></div>
+                <Table dataSource={data} columns={columns}></Table>
                 <Modal
                     title="新增停车位信息"
                     centered
-                    visible={this.state.visible}
+                    visible={visible}
+                    destroyOnClose={true}
                     onOk={()=>{
-                        //addResident()
-                        this.setState({visible:false})
+                        updateTable()
+                        setVisible(false)
                     }}
-                    onCancel={()=> this.setState({visible:false})}
+                    onCancel={()=> setVisible(false)}
                 >
                     <Form
                         name="basic"
@@ -124,7 +179,14 @@ export default class Home extends React.Component {
                                 },
                             ]}
                         >
-                            <Input onChange={(e)=>this.setState({number:e.target.value})}/>
+                            <Input onChange={(e)=>setNumber(e.target.value)} value={number} placeholder={number} disabled={disabled}/>
+                        </Form.Item>
+
+                        <Form.Item
+                            label="停车位租户uuid"
+                            name="uuid"
+                        >
+                            <Input onChange={(e)=>setUuid(e.target.value)} value={uuid} placeholder={uuid}/>
                         </Form.Item>
 
                         <Form.Item
@@ -137,19 +199,20 @@ export default class Home extends React.Component {
                                 },
                             ]}
                         >
-                            <Input onChange={(e)=>this.setState({status:e.target.value})}/>
+                            <Input onChange={(e)=>setStatus(e.target.value)} value={status} placeholder={status}/>
                         </Form.Item>
 
                         <Form.Item
-                            label="租户"
+                            label="停车位租户"
                             name="tenant"
                         >
-                            <Input onChange={(e)=>this.setState({tenant:e.target.value})}/>
+                            <Input onChange={(e)=>setTenant(e.target.value)} value={tenant} placeholder={tenant}/>
                         </Form.Item>
 
                     </Form>
                 </Modal>
             </div>
         )
-    }
 }
+
+export default Parking;

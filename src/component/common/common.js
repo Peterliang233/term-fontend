@@ -47,3 +47,66 @@ export const TransComplaintData = (data) => {
 
     return newData
 }
+
+export const TransRepairData = (data) => {
+    let newData = []
+    data.forEach(function (val, _) {
+        newData.push({
+            key: val.id,
+            name: val.name,
+            phone: val.phone,
+            detail: val.detail,
+            status: val.status,
+            address: val.address,
+        })
+    })
+
+    return newData
+}
+
+export const TransFeeData = (data) => {
+    let newData = []
+    data.forEach(function (val, _) {
+        newData.push({
+            key: val.id,
+            name: val.name,
+            phone: val.phone,
+            status: val.status,
+            feeType: val.feeType,
+            uuid: val.uuid,
+        })
+    })
+
+    return newData
+}
+
+export const TransParkingData = (data) => {
+    let newData = []
+    data.forEach(function (val,_){
+        newData.push({
+            key: val.id,
+            number: val.number,
+            status: val.status,
+            uuid: val.uuid,
+            tenant: val.tenant,
+        })
+    })
+
+    return newData
+}
+
+export const TransUserData = (data)  =>{
+    let newData = []
+
+    data.forEach(function(val,_) {
+        newData.push({
+            key: val.id,
+            username: val.username,
+            password: val.password,
+            uuid: val.uuid,
+            type: val.type,
+        })
+    })
+
+    return newData;
+}

@@ -1,131 +1,172 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Button, Form, Input, Modal, Popconfirm, Table} from "antd";
+import {AddRepair, DelRepair, GetRepairList, UpdateRepair} from "../api/repair/Repair";
+import {ErrorMessage, TransRepairData} from "../common/common";
 
-export default class Repair extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state={
-            visible: false,
-            name: '',
-            phone: '',
-            address:'',
-            detail: '',
-            status: '',
-            data: [
-                {
-                    key: '7',
-                    name: 'John Brown',
-                    phone: 12331421234,
-                    address:'翻斗花园',
-                    detail: 60,
-                    status: 70,
-                },
-                {
-                    key: '2',
-                    name: 'John Brown',
-                    phone: 1234134123,
-                    address:'翻斗花园',
-                    detail: 60,
-                    status: 70,
-                },
-                {
-                    key: '3',
-                    name: 'John Brown',
-                    phone: 2353513134,
-                    address:'翻斗花园',
-                    detail: 60,
-                    status: 70,
-                },
-                {
-                    key: '4',
-                    name: 'John Brown',
-                    phone: 1234531,
-                    address:'翻斗花园',
-                    detail: 60,
-                    status: 70,
-                },
-            ],
-            columns: [
-                {
-                    title: '姓名',
-                    dataIndex: 'name',
-                },
-                {
-                    title: '电话号码',
-                    dataIndex: 'phone',
-                    sorter: {
-                        compare: (a, b) => a.phone - b.phone,
-                        multiple: 3,
-                    },
-                },
-                {
-                    title: '住户单元',
-                    dataIndex: 'address',
-                    sorter: {
-                        compare: (a, b) => a.address - b.address,
-                        multiple: 3,
-                    },
-                },
-                {
-                    title: '报修详情',
-                    dataIndex: 'detail',
-                    sorter: {
-                        compare: (a, b) => a.detail - b.detail,
-                        multiple: 2,
-                    },
-                },
-                {
-                    title: '状态',
-                    dataIndex: 'status',
-                    sorter: {
-                        compare: (a, b) => a.status - b.status,
-                        multiple: 1,
-                    },
-                },
-                {
-                    title: '操作',
-                    dataIndex: 'operator',
-                    render: (_, record) => <div className="operator">
-                        <div>
-                            <Button type="primary" onClick={() => this.setState({visible: true})}>修改信息</Button>
-                        </div>
-                        <div style={{width: "5%"}}/>
-                        <div>
-                            <Button type="primary" danger><Popconfirm
-                                title="确定删除该报修的信息吗？"
-                                onConfirm={()=>delComplaint(record.key)}
-                                //onCancel={cancel}
-                                okText="确定"
-                                cancelText="再想想"
-                            >
-                                <label>删除</label>
-                            </Popconfirm>
-                            </Button>
-                        </div>
-                    </div>
+function Repair() {
+    const [visible,setVisible] = useState(false);
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [address, setAddress] = useState('');
+    const [detail, setDetail] = useState('');
+    const [status, setStatus] = useState('');
+    const [disabled,setDisabled] = useState(false);
+    const [key, setKey] = useState(0);
+    const [data, setData] = useState([]);
+
+    const columns = [
+        {
+            title: '姓名',
+            dataIndex: 'name',
+        },
+        {
+            title: '电话号码',
+            dataIndex: 'phone',
+            sorter: {
+                compare: (a, b) => a.phone - b.phone,
+                multiple: 3,
+            },
+        },
+        {
+            title: '住户单元',
+            dataIndex: 'address',
+            sorter: {
+                compare: (a, b) => a.address - b.address,
+                multiple: 3,
+            },
+        },
+        {
+            title: '报修详情',
+            dataIndex: 'detail',
+            sorter: {
+                compare: (a, b) => a.detail - b.detail,
+                multiple: 2,
+            },
+        },
+        {
+            title: '状态',
+            dataIndex: 'status',
+            sorter: {
+                compare: (a, b) => a.status - b.status,
+                multiple: 1,
+            },
+        },
+        {
+            title: '操作',
+            dataIndex: 'operator',
+            render: (_, record) => <div className="operator">
+                <div>
+                    <Button type="primary" onClick={() => {
+                        setVisible(true)
+                        setName(record.name)
+                        setKey(record.key)
+                        setDetail(record.detail)
+                        setAddress(record.address)
+                        setPhone(record.phone)
+                        setStatus(record.status)
+                        setDisabled(true)
+                    }}>修改信息</Button>
+                </div>
+                <div style={{width: "5%"}}/>
+                <div>
+                    <Button type="primary" danger><Popconfirm
+                        title="确定删除该报修的信息吗？"
+                        onConfirm={()=>delComplaint(record.key)}
+                        okText="确定"
+                        cancelText="再想想"
+                    >
+                        <label>删除</label>
+                    </Popconfirm>
+                    </Button>
+                </div>
+            </div>
+        }
+    ];
+
+    useEffect(()=>{
+        GetRepairList().then((res)=>{
+            if (res.status === 0) {
+                setData(TransRepairData(res.data.data))
+            }
+        }).catch((error)=>{
+            ErrorMessage(error)
+        })
+    })
+
+    const delComplaint = (value)=>{
+        let reqData = {
+            'id': value,
+        }
+
+        DelRepair(reqData).catch((res)=>{
+            if (res.status === 0) {
+                setData(TransRepairData(res.data.data))
+            }
+        }).catch((error)=>{
+            ErrorMessage(error)
+        })
+    }
+
+    const updateTable = () => {
+        if (key===-1){
+            let reqData = {
+                'name': name,
+                'phone': phone,
+                'address': address,
+                'detail': detail,
+                'status': status,
+            }
+
+            AddRepair(reqData).catch((res)=>{
+                if (res.status === 0) {
+                    setData(TransRepairData(res.data.data));
                 }
-            ],
-        };
+            }).catch((error)=>{
+                ErrorMessage(error)
+            })
+        }else{
+            let reqData = {
+                'id': key,
+                'name': name,
+                'phone': phone,
+                'address': address,
+                'detail': detail,
+                'status': status,
+            }
 
-        const delComplaint = (value)=>{
-            console.log(value);
+            UpdateRepair(reqData).catch((res)=>{
+                if (res.status === 0) {
+                    setData(TransRepairData(res.data.data))
+                }
+            }).catch((error)=>{
+                ErrorMessage(error)
+            })
         }
     }
 
-    render(){
         return (
             <div>
-                <div><Button onClick={()=>this.setState({visible:true})}>新增报修</Button></div>
-                <Table dataSource={this.state.data} columns={this.state.columns}></Table>
+                <div><Button onClick={()=>{
+                    setVisible(true)
+                    setDisabled(false)
+                    setName('')
+                    setAddress('')
+                    setPhone('')
+                    setKey(-1)
+                    setDetail('')
+                    setStatus('')
+                }}>新增报修</Button></div>
+                <Table dataSource={data} columns={columns}></Table>
                 <Modal
                     title="新增报修信息"
                     centered
-                    visible={this.state.visible}
+                    visible={visible}
+                    destroyOnClose={true}
                     onOk={()=>{
-                        //addResident()
-                        this.setState({visible:false})
+                        updateTable()
+                        setVisible(false)
                     }}
-                    onCancel={()=> this.setState({visible:false})}
+                    onCancel={()=> setVisible(false)}
                 >
                     <Form
                         name="basic"
@@ -150,7 +191,7 @@ export default class Repair extends React.Component {
                                 },
                             ]}
                         >
-                            <Input onChange={(e)=>this.setState({name:e.target.value})}/>
+                            <Input onChange={(e)=>setName(e.target.value)} disabled={disabled} value={name} placeholder={name}/>
                         </Form.Item>
 
                         <Form.Item
@@ -163,7 +204,7 @@ export default class Repair extends React.Component {
                                 },
                             ]}
                         >
-                            <Input onChange={(e)=>this.setState({phone:e.target.value})}/>
+                            <Input onChange={(e)=>setPhone(e.target.value)} value={phone} placeholder={phone}/>
                         </Form.Item>
 
                         <Form.Item
@@ -176,7 +217,7 @@ export default class Repair extends React.Component {
                                 },
                             ]}
                         >
-                            <Input onChange={(e)=>this.setState({address:e.target.value})}/>
+                            <Input onChange={(e)=>setAddress(e.target.value)} disabled={disabled} value={address} placeholder={address}/>
                         </Form.Item>
                         <Form.Item
                             label="报修详情"
@@ -188,7 +229,7 @@ export default class Repair extends React.Component {
                                 },
                             ]}
                         >
-                            <Input onChange={(e)=>this.setState({detail:e.target.value})}/>
+                            <Input onChange={(e)=>setDetail(e.target.value)} value={detail} placeholder={detail}/>
                         </Form.Item>
 
                         <Form.Item
@@ -201,11 +242,12 @@ export default class Repair extends React.Component {
                                 },
                             ]}
                         >
-                            <Input onChange={(e)=>this.setState({status:e.target.value})}/>
+                            <Input onChange={(e)=>setStatus(e.target.value)} value={status} placeholder={status}/>
                         </Form.Item>
                     </Form>
                 </Modal>
             </div>
         )
-    }
-};
+}
+
+export default Repair;

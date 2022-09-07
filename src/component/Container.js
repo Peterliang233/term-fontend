@@ -1,7 +1,7 @@
 import {
     CarOutlined,
     MenuFoldOutlined,
-    MenuUnfoldOutlined, MessageOutlined, MoneyCollectOutlined, QqOutlined, SettingOutlined,
+    MenuUnfoldOutlined, MessageOutlined, MoneyCollectOutlined, QqOutlined, SettingOutlined,UsergroupAddOutlined,
     UserOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu } from 'antd';
@@ -13,6 +13,7 @@ import Fee from './pages/Fee';
 import Repair from './pages/Repair';
 import Home from "./pages/Home";
 import Parking from './pages/Parking';
+import Register from './pages/Register';
 const { Header, Sider, Content } = Layout;
 
 export default class Container extends React.Component {
@@ -53,6 +54,11 @@ export default class Container extends React.Component {
                     icon:<CarOutlined />,
                     label: '停车位管理',
                 },
+                {
+                    key: '6',
+                    icon:<UsergroupAddOutlined />,
+                    label: '帐号管理',
+                }
             ]
         }
     }
@@ -77,6 +83,7 @@ export default class Container extends React.Component {
             case '3': return <Repair/>
             case '4': return <Fee/>
             case '5': return <Parking/>
+            case '6': return <Register/>
             default:
                 return <Home/>
         }

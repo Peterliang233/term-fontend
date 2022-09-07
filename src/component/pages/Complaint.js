@@ -11,36 +11,7 @@ function Complaint() {
     const [key,setKey] = useState(0);
     const [visible, setVisible] = useState(false);
     const [disabled, setDisabled] = useState(false);
-    const [data, setData] = useState( [
-        {
-            key: '7',
-            name: 'John Brown',
-            phone: 12331421234,
-            detail: 60,
-            status: 70,
-        },
-        {
-            key: '2',
-            name: 'John Brown',
-            phone: 1234134123,
-            detail: 60,
-            status: 70,
-        },
-        {
-            key: '3',
-            name: 'John Brown',
-            phone: 2353513134,
-            detail: 60,
-            status: 70,
-        },
-        {
-            key: '4',
-            name: 'John Brown',
-            phone: 1234531,
-            detail: 60,
-            status: 70,
-        },
-    ]);
+    const [data, setData] = useState([]);
     const columns = [
         {
             title: '姓名',
@@ -176,6 +147,7 @@ function Complaint() {
                     title="新增业主信息"
                     centered
                     visible={visible}
+                    destroyOnClose={true}
                     onOk={()=>{
                         updateTable()
                         setVisible(false)

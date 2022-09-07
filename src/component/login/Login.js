@@ -1,4 +1,4 @@
-import { Button, Checkbox, Form, Input, message } from 'antd';
+import { Button, Form, Input } from 'antd';
 import React from 'react';
 import {LoginReq} from "../api/user/User";
 import "./Login.css";
